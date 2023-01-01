@@ -5,7 +5,7 @@
 
   The key is a tuple of <table, binary>, value is a tuple of <present, seqnum, binary>.
 
-  Simple RPC APIs are exposed by the service:
+- Simple RPC APIs are exposed by the service:
 
   - `GET`        get up to 8 key/value pairs
   - `CONFIRM`    confirm up to 8 key/value pairs if the are up to date
@@ -17,6 +17,53 @@
   - `tar xf rubiks-bin.tgz`
   - `source local/hack_aliases`
   - `local/start-rubiks.sh`
+
+- a few facts
+
+  - in rubiks each page takes `32 KiB`, we have `~30 KiB` for key/value pairs.
+  - to ensure each page can be splitted, we allow at least 2 key/values pairs in
+    each page.
+  - each key/value pair is allowd to be `15 KiB` in size.
+  - to ensure not to split the same page twice in single transaction, `COMMIT`
+    allows up to `30 KiB` bytes for all key/value pairs.
+
+- error codes from RPC call
+
+  - `OK`
+
+    happy RPC
+
+  - `TIMEOUT`
+
+    each RPC is deadline bounded and the service returns timeout when it can't
+    serve the request within the deadline.
+
+  - `INVAL`
+
+    when the RPC sends invalid request
+
+  - `STALE`
+
+    for `COMMIT` and `CONFIRM` call. This happens when any key/value pair in
+    transaction was updated by someone else.
+
+    this can also be false alarm given that the seqnum is shared by `hash(key) % 4M`.
+    the right action is to take is to abort the transaction and retry.
+
+  - `NONEXT`
+
+    for `ITERATE` when it reaches the last key/value pair in the table.
+
+    for `COMMIT` when rubiks is out of storage space. 
+
+  - `EIO`
+
+    happens when there is network problem.
+
+- ORM (object rubiks mapping)
+
+  it is a way to map programing language objects in to key/value pair in database.
+  Find example in both java/golang example programs.
 
 - java driver: https://github.com/rubiksdb/rubiksdb-driver-java
 
