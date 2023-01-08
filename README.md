@@ -22,10 +22,11 @@
 
   - in rubiks each page takes `32 KiB`, we have `~30 KiB` for key/value pairs.
   - to ensure each page can be splitted, we allow at least 2 key/values pairs in
-    each page.
-  - each key/value pair is allowd to be `15 KiB` in size.
-  - to ensure not to split the same page twice in single transaction, `COMMIT`
-    allows up to `30 KiB` bytes for all key/value pairs.
+    a page.  Hence each key/value pair is allowd to be `15 KiB` in size.
+  - to ensure not to split a page twice in one transaction, `COMMIT` allows up to
+    `15 KiB` bytes for all key/value pairs.
+  - the storage transaction allows up to 18 pages and rubiks transaction allows
+    up to 8 key/value pairs.
 
 - error codes from RPC call
 
